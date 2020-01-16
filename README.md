@@ -26,3 +26,5 @@ Installation(short):
 Hardware Requirements:
    sapcon-terminal works well with devices with FTDI232(https://www.ftdichip.com/Products/ICs/FT232R.htm),
    however other USB to serial USART interfaces should work as well.
+# About Sapcon Instruments
+Manufacturers of Level Sensors and Level Transmitters, based in Indore,India. 
