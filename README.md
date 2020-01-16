@@ -10,8 +10,8 @@ Features that may be added in the future:
 
 * Modbus-RTU support
 Developers:
-*Dhananjay Palshikar(@djpalshikar)
-*Pankaj Jain
+* Dhananjay Palshikar(@djpalshikar)
+* Pankaj Jain
 
 Licence: GPL V3, see LICENCE for more information
 Installation(short):
