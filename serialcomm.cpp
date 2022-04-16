@@ -255,8 +255,17 @@ tempFile.truncate(tempFile.lastIndexOf("/"));
     dir_path->setText("Path:= .."+dirpath.right(50));
             qDebug()<<tempFile<<dirpath;
 
-                QFile::copy(":/new/prefix1/.filter.sh",tempFile+"/.filter.sh");
-                QFile::setPermissions(tempFile+"/.filter.sh",QFile::ExeOther|QFile::ReadOther|QFile::WriteOther|QFile::ReadOwner|QFile::ReadUser|QFile::ExeUser|QFile::ExeOwner|QFile::ReadGroup|QFile::ExeGroup);
+
+    if(!QFile::exists(filterpath))
+        QFile::copy(":/new/prefix1/.filter.sh",tempFile+"/.filter.sh");
+    else
+        QFile::copy(filterpath,tempFile+"/.filter.sh");
+
+    QFile::setPermissions(tempFile+"/.filter.sh",QFile::ExeOther|QFile::ReadOther|QFile::WriteOther|QFile::ReadOwner|QFile::ReadUser|QFile::ExeUser|QFile::ExeOwner|QFile::ReadGroup|QFile::ExeGroup);
+
+
+
+
 }
 }
 
@@ -399,7 +408,13 @@ void serialComm::set_comports_on_combobox()
         QString str2 = portnumber.at(portnumber.count()-i-1).portName;
         str2.truncate(6);
         if(str1==str2) temp = i;
-        comports->addItem(portnumber.at(portnumber.count()-i-1).portName);
+        bool realPort = false;
+        #ifdef Q_OS_LINUX
+        if (QString(portnumber.at(portnumber.count()-i-1).portName).startsWith("ttyUSB"))
+                realPort = true;
+        #endif
+        if (realPort)
+            comports->addItem(portnumber.at(portnumber.count()-i-1).portName);
     }
 comports->setCurrentIndex(temp);
  connect(comports,SIGNAL(currentIndexChanged(int)),this,SLOT(set_connection(int)));
@@ -511,7 +526,7 @@ void serialComm::responceFromInstruments()
     io_plaintext->moveCursor(QTextCursor::End);
     if(hexToAscii->isChecked()){
         io_plaintext->insertPlainText(QString(test3.toHex()));
-        if(test3.length() > 20)
+        if(test3.length() > 10)
             io_plaintext->appendPlainText("\n");
 
     }
@@ -531,13 +546,18 @@ void serialComm::responceFromInstruments()
     file.close();
     //qDebug()<<temp;
   //  qDebug()<<save_values<<"    gap   "<<update_graph->currentText().toInt();
-   if(save_values>=update_graph->currentText().toInt())
+   if(save_values>=update_graph->currentText().toInt() or (hexToAscii->isChecked()))
     {
         QFile tempfile(tempFile+"/.temp.CSV");
-        qDebug()<<buffer;
         tempfile.open(QIODevice::Append);
-        tempfile.write(buffer.toLatin1());
-        qDebug()<<buffer;
+        if(hexToAscii->isChecked())
+            tempfile.write(test3.toHex());
+        else
+            tempfile.write(buffer.toLatin1());
+        if (new_line->isChecked()){
+            tempfile.write("\n");
+        }
+        qDebug()<<"hex "<<QString(test3.toHex()).toLatin1();
 
         tempfile.close();
         buffer.clear();
@@ -554,7 +574,7 @@ void serialComm::responceFromInstruments()
 
         filter->start("/bin/bash",QStringList()<<"-c"<<test5);
         filter->waitForFinished();
-        tempfile.remove();
+        //tempfile.remove();
 
     }
 }
@@ -583,6 +603,7 @@ void serialComm::tx_serial_exe(QString x)
             warnned = false;
 
         }
+        port->flush();
     }
     else {
        if(warnned==false)
