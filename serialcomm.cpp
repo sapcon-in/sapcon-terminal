@@ -390,6 +390,7 @@ void serialComm::set_baudrate_on_combobox()
    // baudrate_list.append("56000");
     baudrate_list.append("57600");
     baudrate_list.append("115200");
+    baudrate_list.append("962100");
  //   baudrate_list.append("128000");
     baudrate->addItems(baudrate_list);
 }
